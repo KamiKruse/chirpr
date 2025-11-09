@@ -6,7 +6,7 @@ import * as schema from '../schema.js'
 import { configObj } from '../config.js'
 
 
-const migrationClient = postgres(configObj.dbConfig.dbURL, {max:1})
-await migrate(drizzle(migrationClient), configObj.dbConfig.migrationConfig)
-const conn = postgres(configObj.dbConfig.dbURL)
+const migrationClient = postgres(configObj.db.dbURL, {max:1})
+await migrate(drizzle(migrationClient), configObj.db.migrationConfig)
+const conn = postgres(configObj.db.dbURL)
 export const db = drizzle(conn, { schema })

@@ -6,6 +6,7 @@ import {
 import { createChirp } from '../db/queries/create-chirp.js'
 import { getBearerToken, validateJWT } from '../auth.js'
 import { configObj } from '../config.js'
+
 export async function handlerChirps(
   req: Request,
   res: Response,
@@ -13,7 +14,7 @@ export async function handlerChirps(
 ) {
   try {
     const bearerToken = getBearerToken(req)
-    const authenticatedUser = validateJWT(bearerToken, configObj.secret)
+    const authenticatedUser = validateJWT(bearerToken, configObj.jwt.secret)
     const { body } = req.body as { body?: string }
     if (!body) {
       throw new BadRequest_400_Error('Invalid request body')

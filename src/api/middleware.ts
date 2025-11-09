@@ -26,7 +26,7 @@ export const MetricsIncrementMiddleware = (
   res: Response,
   next: NextFunction
 ): void => {
-  configObj.fileserverHits += 1
+  configObj.api.fileserverHits += 1
   next()
 }
 
@@ -36,6 +36,9 @@ export const errorHandlerMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
+  if (res.headersSent) {
+    return next(err)
+  }
   if (err instanceof BadRequest_400_Error) {
     res.status(400).json({ error: err.message })
   } else if (err instanceof Unauthorized_401_Error) {

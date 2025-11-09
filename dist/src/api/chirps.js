@@ -5,7 +5,7 @@ import { configObj } from '../config.js';
 export async function handlerChirps(req, res, next) {
     try {
         const bearerToken = getBearerToken(req);
-        const authenticatedUser = validateJWT(bearerToken, configObj.secret);
+        const authenticatedUser = validateJWT(bearerToken, configObj.jwt.secret);
         const { body } = req.body;
         if (!body) {
             throw new BadRequest_400_Error('Invalid request body');

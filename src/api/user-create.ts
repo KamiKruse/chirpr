@@ -9,7 +9,6 @@ export const handlerUserCreation = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log('POST /api/users hit', req.body)
   type EmailParams = {
     password: string,
     email: string

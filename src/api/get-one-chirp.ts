@@ -17,10 +17,8 @@ export async function handlerGetSingleChirp(
     if (!singleChirp) {
       throw new NotFound_404_Error('Chirp not found')
     }
-    res.status(200).json(singleChirp)  
+    res.status(200).json({ body: singleChirp.body })
   } catch (error) {
     next(error)
   }
-  
 }
- 

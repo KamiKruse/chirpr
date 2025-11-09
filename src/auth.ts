@@ -1,12 +1,17 @@
 import * as argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
 import { JwtPayload } from 'jsonwebtoken'
-import { Forbidden_403_Error, Unauthorized_401_Error } from './error-classes.js'
+import {
+  BadRequest_400_Error,
+  Forbidden_403_Error,
+  Unauthorized_401_Error,
+} from './error-classes.js'
 import { Request } from 'express'
 import { randomBytes } from 'node:crypto'
 import { refreshTokens } from './schema.js'
 
 const TOKEN_ISSUER = 'chirpy'
+
 export async function hashPassword(password: string): Promise<string> {
   try {
     if (!password) {
@@ -91,15 +96,28 @@ export function validateJWT(tokenString: string, secret: string): string {
 export function getBearerToken(req: Request): string {
   const returnForReqGet = req.get('Authorization')
   if (!returnForReqGet) {
-    throw new Unauthorized_401_Error('No bearer token')
+    throw new Unauthorized_401_Error('Bearer Token not found')
   }
-  return returnForReqGet.replace('Bearer', '').trim()
+  const split = returnForReqGet.split(' ')
+  if (split.length < 2 || split[0] !== 'Bearer') {
+    throw new BadRequest_400_Error('Malformed authorization header')
+  }
+  return split[1]
 }
 
 export function makeRefreshToken(): string {
-  if(refreshTokens.revokedAt === null){
-    const buf = randomBytes(256)
-    return buf.toString('hex')
+  const buf = randomBytes(256)
+  return buf.toString('hex')
+}
+
+export function getAPIKey(req: Request) {
+  const apiKeyVal = req.get('Authorization')
+  if (!apiKeyVal) {
+    throw new Unauthorized_401_Error('API key not found')
   }
-  throw new Forbidden_403_Error('Refresh token is still active')
+  const split = apiKeyVal.split(' ')
+  if (split.length < 2 || split[0] !== 'ApiKey') {
+    throw new BadRequest_400_Error('Malformed authorization header')
+  }
+  return split[1]
 }

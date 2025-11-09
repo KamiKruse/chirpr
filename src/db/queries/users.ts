@@ -10,7 +10,8 @@ export async function createUser(user: NewUser) {
       id: users.id,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
-      email: users.email
+      email: users.email,
+      isChirpyRed: users.isChirpyRed
     })
   return result
 }

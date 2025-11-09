@@ -7,7 +7,7 @@ export const handlerMetricReadout = (_, res) => {
     res.send(`<html>
   <body>
     <h1>Welcome, Chirpy Admin</h1>
-    <p>Chirpy has been visited ${configObj.fileserverHits} times!</p>
+    <p>Chirpy has been visited ${configObj.api.fileserverHits} times!</p>
   </body>
 </html>`);
 };

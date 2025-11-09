@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { timestamp, varchar, uuid, pgTable, text } from 'drizzle-orm/pg-core'
+import { timestamp, varchar, uuid, pgTable, text, boolean } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -10,6 +10,7 @@ export const users = pgTable('users', {
     .$onUpdate(() => new Date()),
   email: varchar('email', { length: 256 }).unique().notNull(),
   hashedPassword: varchar('hashed_password').notNull().default('unset'),
+  isChirpyRed: boolean('is_chirpy_red').default(false)
 })
 export const userRelations = relations(users, ({ many }) => ({
   chirps: many(chirps),
@@ -34,7 +35,7 @@ export const chirpsRelations = relations(chirps, ({ one }) => ({
   }),
 }))
 export const refreshTokens = pgTable('refresh_tokens', {
-  token: text('token').primaryKey(),
+  token: varchar('token', { length: 512 }).primaryKey().notNull(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at')
     .notNull()
@@ -55,3 +56,4 @@ export const refreshTokenRelations = relations(refreshTokens, ({ one }) => ({
 export type NewUser = typeof users.$inferInsert
 export type Chirp = typeof chirps.$inferInsert
 export type RefreshToken = typeof refreshTokens.$inferInsert
+export type User = Omit<typeof users.$inferInsert, 'hashedPassword'>

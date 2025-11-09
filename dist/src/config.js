@@ -6,15 +6,25 @@ function envOrThrow(key) {
     }
     return value;
 }
+const migrationConfig = {
+    migrationsFolder: './src/db/migrations',
+};
 const configObj = {
-    fileserverHits: 0,
-    dbConfig: {
-        dbURL: envOrThrow('DB_URL'),
-        migrationConfig: {
-            migrationsFolder: './src/db/migrations',
-        },
+    api: {
+        fileserverHits: 0,
+        platform: envOrThrow('PLATFORM'),
+        port: Number(envOrThrow('PORT')),
+        apiKey: envOrThrow('POLKA_KEY')
     },
-    platform: process.env.PLATFORM || 'unknown',
-    secret: process.env.SECRET
+    db: {
+        dbURL: envOrThrow('DB_URL'),
+        migrationConfig,
+    },
+    jwt: {
+        defaultDuration: 60 * 60,
+        refreshDuration: 60 * 60 * 24 * 60 * 1000,
+        issuer: 'chirpy',
+        secret: envOrThrow('SECRET'),
+    },
 };
 export { configObj };

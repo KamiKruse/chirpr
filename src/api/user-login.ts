@@ -7,10 +7,7 @@ import {
 import { checkPassword, makeJWT, makeRefreshToken } from '../auth.js'
 import { userExists } from '../db/queries/read-user.js'
 import { configObj } from '../config.js'
-
-const SECONDS_IN_HOUR = 60 * 60
-const SECONDS_IN_DAY = SECONDS_IN_HOUR * 24
-const NUMBER_OF_DAYS = 60
+import { createRefreshTokens } from '../db/queries/create-refresh-token.js'
 
 export async function handlerUserLogin(
   req: Request,
@@ -21,11 +18,6 @@ export async function handlerUserLogin(
     password: string
     email: string
   }
-  const nowInSeconds = Math.floor(Date.now() / 1000)
-  const expClaim = {
-    jwtExpiration: nowInSeconds + SECONDS_IN_HOUR,
-    refershTokenExpiration: nowInSeconds + SECONDS_IN_DAY * NUMBER_OF_DAYS,
-  }
   try {
     const parsedBody: LoginParams = req.body
     if (!parsedBody || !Object.hasOwn(parsedBody, 'email')) {
@@ -35,26 +27,38 @@ export async function handlerUserLogin(
       throw new BadRequest_400_Error('Invalid request body')
     }
 
-    const updatedObj = Object.assign(parsedBody, expClaim.jwtExpiration)
-
-    const returnedUser = await userExists(updatedObj.email)
+    const returnedUser = await userExists(parsedBody.email)
 
     if (!returnedUser) {
       throw new NotFound_404_Error('User not found')
     }
 
     const verified = await checkPassword(
-      updatedObj.password,
+      parsedBody.password,
       returnedUser.hashedPassword
     )
 
     const { hashedPassword: _omit, ...response } = returnedUser as any
 
     if (verified) {
-      const jwtToken = makeJWT(returnedUser.id, updatedObj, configObj.secret)   
+      const jwtToken = makeJWT(
+        returnedUser.id,
+        configObj.jwt.defaultDuration,
+        configObj.jwt.secret
+      )
       const refreshToken = makeRefreshToken()
-      const updatedResponse = { ...response, token: jwtToken, refreshToken: refreshToken }
-
+      const refreshTokenDB = await createRefreshTokens(
+        refreshToken,
+        returnedUser.id
+      )
+      if (!refreshTokenDB) {
+        throw new Unauthorized_401_Error('could not save refresh token')
+      }
+      const updatedResponse = {
+        ...response,
+        token: jwtToken,
+        refreshToken: refreshToken,
+      }
       res.status(200).json(updatedResponse)
     } else {
       throw new Unauthorized_401_Error('Incorrect email or password')

@@ -10,10 +10,13 @@ export const LogResponsesMiddleware = (req, res, next) => {
     next();
 };
 export const MetricsIncrementMiddleware = (_, res, next) => {
-    configObj.fileserverHits += 1;
+    configObj.api.fileserverHits += 1;
     next();
 };
 export const errorHandlerMiddleware = (err, _, res, next) => {
+    if (res.headersSent) {
+        return next(err);
+    }
     if (err instanceof BadRequest_400_Error) {
         res.status(400).json({ error: err.message });
     }

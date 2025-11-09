@@ -13,9 +13,13 @@ import { handlerUserCreation } from './api/user-create.js'
 import { handlerUserLogin } from './api/user-login.js'
 import { handlerChirps } from './api/chirps.js'
 import { handlerRefreshToken } from './api/refresh-token.js'
+import { handlerRevokeToken } from './api/revoke-token.js'
+import { handlerAuthUpdate } from './api/auth-update.js'
+import { handlerChirpDelete } from './api/chirp-delete.js'
+import { handlerPolkaWebhook } from './api/polka-webhook.js'
+import { configObj } from './config.js'
 
 const app = express()
-const PORT = 8080
 
 //Middlewares
 app.use(express.json())
@@ -32,8 +36,14 @@ app.post('/api/login', handlerUserLogin)
 app.get('/admin/metrics', handlerMetricReadout)
 app.post('/admin/reset', handlerReset)
 app.post('/api/refresh', handlerRefreshToken)
+app.post('/api/revoke', handlerRevokeToken)
+app.put('/api/users', handlerAuthUpdate)
+app.delete('/api/chirps/:chirpId', handlerChirpDelete)
+app.post('/api/polka/webhooks', handlerPolkaWebhook)
 
 //Error Handling
 app.use(errorHandlerMiddleware)
 
-app.listen(PORT, () => console.log(`server listening on port ${PORT}`))
+app.listen(configObj.api.port, () =>
+  console.log(`server listening on port ${configObj.api.port}`)
+)
